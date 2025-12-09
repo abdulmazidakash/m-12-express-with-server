@@ -26,61 +26,6 @@ app.get('/', logger, (req: Request, res: Response) => {
 // user crud
 app.use('/users',userRoutes);
 
-// update single user
-app.put('/users/:id', async (req: Request, res: Response) => {
-  const { name, email } = req.body;
-
-  try {
-    const result = await pool.query(`UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *`, [name, email, req?.params?.id]);
-
-    if (result.rows.length === 0) {
-      res.status(404).json({
-        success: false,
-        message: 'user not found',
-      })
-    } else {
-      res.status(200).json({
-        success: true,
-        message: 'user updated successfully',
-        data: result.rows[0],
-      })
-    };
-
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error?.message,
-    })
-  }
-});
-
-
-// delete single user
-app.delete('/users/:id', async (req: Request, res: Response) => {
-  try {
-    const result = await pool.query(`DELETE FROM users WHERE id = $1`, [req?.params?.id]);
-
-    if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: 'user not found',
-      })
-    } else {
-      res.status(200).json({
-        success: true,
-        message: 'user deleted successfully',
-        data: result.rows,
-      })
-    }
-
-  } catch (err: any) {
-    res.status(500).json({
-      success: false,
-      message: err?.message,
-    })
-  }
-});
-
 // todos crud operations will be here
 app.post('/todos', async (req: Request, res: Response) => {
   const { user_id, title } = req.body;
