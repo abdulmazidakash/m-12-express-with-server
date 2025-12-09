@@ -1,6 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
 import config from './config';
 import initDB, { pool } from './config/db';
+import logger from './middleware/logger';
+import { userRoutes } from './modules/user/user.routes';
 
 
 const app = express();
@@ -11,11 +13,7 @@ app.use(express.json());
 
 // when use form data
 // app.use(express.urlencoded());
-const logger = (req: Request, res: Response, next: NextFunction)=>{
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}\n`);
 
-  next();
-}
 
 // initialize database tables
 initDB();
@@ -25,86 +23,22 @@ app.get('/', logger, (req: Request, res: Response) => {
 
 });
 
-app.post('/users', async(req: Request, res: Response)=>{
-  const { name, email } = req.body;
-  try{
-    const result = await pool.query(
-      `INSERT INTO users(name, email) VALUES($1, $2) RETURNING *`,
-      [name, email]
-    );
-    console.log(result.rows[0]);
-    res.status(201).json({
-      success: true,
-      message: 'user created successfully',
-      data: result.rows[0],
-    })
-  }catch(err: any){
-    res.status(500).json({
-    success: false,
-    message: err?.message,
-  })
-  }
-});
-
-
-// all data get
-app.get('/users', async(req: Request, res: Response)=>{
-  try{
-    const result = await pool.query(`SELECT * FROM users`);
-
-    res.status(200).json({
-      success: true,
-      message: 'users fetched successfully',
-      data: result.rows,
-    });
-
-  }catch(err: any){
-    res.status(500).json({
-      success: false,
-      message: err?.message,
-      details: err,
-    })
-  }
-});
-
-//single user data get
-app.get('/users/:id', async(req: Request, res: Response)=>{
-  try {
-    const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [req?.params?.id,]);
-
-    if(result.rows.length === 0){
-      res.status(404).json({
-        success: false,
-        message: 'user not found',
-      });
-    }else{
-      res.status(200).json({
-      success: true,
-      message: 'single user fetched successfully',
-      data: result.rows[0],
-    })
-    };
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error?.message,
-    })
-  };
-});
+// user crud
+app.use('/users',userRoutes);
 
 // update single user
-app.put('/users/:id', async(req: Request, res: Response)=>{
-  const {name, email} = req.body;
+app.put('/users/:id', async (req: Request, res: Response) => {
+  const { name, email } = req.body;
 
   try {
     const result = await pool.query(`UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *`, [name, email, req?.params?.id]);
 
-    if(result.rows.length === 0){
+    if (result.rows.length === 0) {
       res.status(404).json({
         success: false,
         message: 'user not found',
       })
-    }else{
+    } else {
       res.status(200).json({
         success: true,
         message: 'user updated successfully',
@@ -122,16 +56,16 @@ app.put('/users/:id', async(req: Request, res: Response)=>{
 
 
 // delete single user
-app.delete('/users/:id', async(req: Request, res: Response)=>{
-  try{
+app.delete('/users/:id', async (req: Request, res: Response) => {
+  try {
     const result = await pool.query(`DELETE FROM users WHERE id = $1`, [req?.params?.id]);
 
-    if(result.rowCount === 0){
+    if (result.rowCount === 0) {
       res.status(404).json({
         success: false,
         message: 'user not found',
       })
-    }else{
+    } else {
       res.status(200).json({
         success: true,
         message: 'user deleted successfully',
@@ -139,7 +73,7 @@ app.delete('/users/:id', async(req: Request, res: Response)=>{
       })
     }
 
-  }catch(err: any){
+  } catch (err: any) {
     res.status(500).json({
       success: false,
       message: err?.message,
@@ -148,10 +82,10 @@ app.delete('/users/:id', async(req: Request, res: Response)=>{
 });
 
 // todos crud operations will be here
-app.post('/todos', async(req: Request, res: Response)=>{
+app.post('/todos', async (req: Request, res: Response) => {
   const { user_id, title } = req.body;
 
-  try{
+  try {
     const result = await pool.query(`INSERT INTO todos(user_id, title) VALUES($1, $2) RETURNING *`, [user_id, title]);
 
     res.status(201).json({
@@ -159,7 +93,7 @@ app.post('/todos', async(req: Request, res: Response)=>{
       message: 'todo created successfully',
       data: result.rows[0],
     });
-  }catch(err: any){
+  } catch (err: any) {
     res.status(500).json({
       success: false,
       message: err?.message,
@@ -169,7 +103,7 @@ app.post('/todos', async(req: Request, res: Response)=>{
 
 
 // get all todos
-app.get('/todos', async(req: Request, res: Response)=>{
+app.get('/todos', async (req: Request, res: Response) => {
   try {
     const result = await pool.query(`SELECT * FROM todos`);
 
@@ -178,7 +112,7 @@ app.get('/todos', async(req: Request, res: Response)=>{
       message: 'todos fetched successfully',
       data: result.rows,
     })
-    
+
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -247,7 +181,7 @@ app.delete("/todos/:id", async (req, res) => {
 
 
 // 404 route
-app.use((req, res)=>{
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: 'route not found',
