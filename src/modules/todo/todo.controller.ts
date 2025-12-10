@@ -53,9 +53,44 @@ const getSingleTodo = async (req: Request, res: Response) => {
   }
 };
 
+const updateTodo = async (req: Request, res: Response) => {
+  const { title, completed } = req.body;
+
+  try {
+    const result = await todoServices.updateToDo(title, completed, req.params.id as string);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Failed to update todo" });
+  }
+};
+
+const deleteToDo = async (req: Request, res: Response) => {
+  try {
+    const result = await todoServices.deleteToDo(req.params.id!);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    res.json({ success: true, message: "Todo deleted", data: null });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Failed to delete todo" });
+  }
+};
+
 
 export const todoControllers = {
   createToDo,
   getTodo,
   getSingleTodo,
-}
+  updateTodo,
+  deleteToDo
+};
+
