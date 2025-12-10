@@ -13,10 +13,10 @@ const router = express.Router();
 router.post('/', userControllers.createUser);
 
 // get all users
-router.get('/', logger, auth(), userControllers.getUser);
+router.get('/', logger, auth("admin"), userControllers.getUser);
 
 // get single user
-router.get('/:id', userControllers.getSingleUser);
+router.get('/:id', auth("admin", "user"), userControllers.getSingleUser);
 
 // update user
 router.put('/:id', userControllers.updateUser);
