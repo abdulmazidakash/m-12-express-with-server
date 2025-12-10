@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { pool } from '../../config/db';
 import { userControllers } from './user.controller';
+import logger from '../../middleware/logger';
+import auth from '../../middleware/auth';
 
 const router = express.Router();
 
@@ -11,7 +13,7 @@ const router = express.Router();
 router.post('/', userControllers.createUser);
 
 // get all users
-router.get('/', userControllers.getUser);
+router.get('/', logger, auth(), userControllers.getUser);
 
 // get single user
 router.get('/:id', userControllers.getSingleUser);
