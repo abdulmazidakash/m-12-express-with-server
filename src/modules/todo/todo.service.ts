@@ -17,10 +17,11 @@ const getSingleTodo = async (id: string) => {
     return result;
 };
 
-const updateToDo = async (title: string, completed: boolean, id: string) => {
+const updateToDo = async (payload: Record<string, unknown>, id: string) => {
+    const { title, completed } = payload;
     const result = await pool.query(
         "UPDATE todos SET title=$1, completed=$2 WHERE id=$3 RETURNING *",
-        [title, completed,id]
+        [title,completed,id]
     );
 
     return result;

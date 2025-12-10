@@ -10,8 +10,9 @@ const initDB = async()=>{
     CREATE TABLE IF NOT EXISTS users(
     id SERIAL PRIMARY KEY,
     name VARCHAR(150) UNIQUE NOT NULL,
-    age INT,
     email VARCHAR(150) UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    age INT,
     phone VARCHAR(15),
     address TEXT,
     created_at TIMESTAMP DEFAULT NOW(),

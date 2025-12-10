@@ -5,16 +5,13 @@ import logger from './middleware/logger';
 import { userRoutes } from './modules/user/user.routes';
 import { todoRoutes } from './modules/todo/todo.routes';
 
-
 const app = express();
-
 
 //parser
 app.use(express.json());
 
 // when use form data
 // app.use(express.urlencoded());
-
 
 // initialize database tables
 initDB();
@@ -24,10 +21,10 @@ app.get('/', logger, (req: Request, res: Response) => {
 
 });
 
-// user crud
+// user crud operations here
 app.use('/users',userRoutes);
 
-// todos crud operations will be here
+// todos crud operations here
 app.use('/todos', todoRoutes);
 
 // 404 route
